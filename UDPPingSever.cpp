@@ -30,6 +30,7 @@ int main() {
 	servaddr.sin_port = htons(PORT); // port number
 	
 	// Bind the socket with the server address 
+	/* Only needed with the server, not needed for the client */
 	bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr));
 	
 	// random generator
