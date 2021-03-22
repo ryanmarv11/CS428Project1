@@ -25,9 +25,9 @@ int main() {
 	memset(&cliaddr, 0, sizeof(cliaddr)); 
 	
 	// Fill server information 
-	servaddr.sin_family = AF_INET; // IPv4 
-	servaddr.sin_addr.s_addr = INADDR_ANY; // localhost
-	servaddr.sin_port = htons(PORT); // port number
+	serv_addr.sin_family = AF_INET; // IPv4 
+	serv_addr.sin_addr.s_addr = INADDR_ANY; // localhost
+	serv_addr.sin_port = htons(PORT); // port number
 	
 	// Bind the socket with the server address 
 	/* Only needed with the server, not needed for the client */
