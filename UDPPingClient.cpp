@@ -22,28 +22,29 @@ int main()
 	char* message = (char*)"Ping";		//pretty weird that it will autocast in c but not c++
 	char buffer[1024];
 
-	if((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)	//attempt to create a socket
+	if((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)	//Attempt to create a socket
 	{
-		//if the program reachers here, the socket failed to create
+		//if the program reaches here, the socket failed to create
 		cout << "ERROR: SOCKET CANNOT BE CREATED. EXPLODING IN T-MINUS 5 SECONDS." << endl;
 		return -1;
 	}
 	
-	//Finishes creating of the socket
+	//Finishes creating of the socket (step 1)
 	memset(&serv_addr, 0, sizeof(serv_addr)); 
 	memset(&client_addr, 0, sizeof(client_addr)); 
 	
-	//Fills in server information
+	//Fills in server information (step 1)
 	serv_addr.sin_family = AF_INET; // IPv4 
-	serv_addr.sin_addr.s_addr = INADDR_ANY; // localhost
-	serv_addr.sin_port = htons(PORT); // port number
+	serv_addr.sin_addr.s_addr = INADDR_ANY;		// localhost
+	serv_addr.sin_port = htons(PORT);		// port number
 
-	//Setting socket timeout by putting it in non-blocking mode
+	//Setting socket timeout by putting it in non-blocking mode (step 2)
 	struct timeval t;
-	t.tv_sec = 0;
-	t.tv_usec = 1000000;
-	if(setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &t, sizeof(t)) < 0)
+	t.tv_sec = 1;	//whole seconds
+	t.tv_usec = 0;	//nanoseconds
+	if(setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &t, sizeof(t)) < 0) //this line actually does/attempts the timeout setup
 	{
+		//if the program reaches here, the socket timeout failed to set to 1 second 
 		cout << "ERROR: Setting timeout has failed." << endl;
 		return -1;
 	}
@@ -51,23 +52,26 @@ int main()
 	//Initialize variables for getting RTT
 	time_t startTime, endTime;
 	
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < 10; i++)	//sending 10 messages
 	{
-		//Send the message to the server
-		time(&startTime);
-		send(sock, message, strlen(message), 0);
-		cout << "Ping sent." << endl;
-		time(&endTime);
-		//Read the message from the server
-		valread = read(sock, buffer, 1024);
-		if(valread < 0)
-		{
-			cout << "ERROR: Failed to read from socket." << endl;
-		}
-		cout << buffer << endl;
+			time(&startTime);	//start time is marked
+			send(sock, message, strlen(message), 0);	//sends the message
+			cout << "Ping sent." << endl;
+			valread = read(sock, buffer, 1024);	//Read the message from the server
+			time(&endTime);		//end time is marked
+			if(valread < 0)	//checks if read was successful
+			{
+				//if the program gets here then the socket read failed (the packet was lost)
+				cout << "No message recieved from socket, assuming lost packet." << endl;
+				
+			}
+			else	//successful read from socket, the packet was not lost
+			{
+				cout << "Message recieved from socket: " << buffer << "." << endl;
+				cout << "The RTT for trip " << i + 1 << " is: " << difftime(endTime, startTime) << endl;
+			}
+
 	}
+	close(sock);
 	return 0;
-
-
-
 }
